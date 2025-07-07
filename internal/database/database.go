@@ -9,12 +9,15 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// Dbinstance - структура для базы данных
 type Dbinstance struct {
 	Db *gorm.DB
 }
 
+// DB - глобальная переменная для работы с базой данных
 var DB Dbinstance
 
+// ConnectDB производит соединение с бд и миграцию
 func ConnectDB(dbHost string, dbUser string, dbPassword string, dbName string, dbPort int) error {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Europe/Moscow",

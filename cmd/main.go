@@ -2,23 +2,45 @@ package main
 
 import (
 	"fmt"
-	"github.com/Ararat25/auth-service/internal/controller"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/Ararat25/auth-service/config"
+	_ "github.com/Ararat25/auth-service/docs"
+	"github.com/Ararat25/auth-service/internal/controller"
 	"github.com/Ararat25/auth-service/internal/database"
 	middle "github.com/Ararat25/auth-service/internal/middleware"
 	"github.com/Ararat25/auth-service/internal/model"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-const configPath = "config.yml"
+const configPath = "config.yml" // путь до файла конфигурации
 
+// @title Auth Service API
+// @version 1.0
+// @description This is an authentication service with JWT
+// @host localhost:8080
+// @BasePath /
 func main() {
+	handler, conf := initApp()
+
+	r := initRouter(handler)
+
+	hostPort := fmt.Sprintf("%s:%d", conf.Server.Host, conf.Server.Port)
+
+	log.Printf("Server starting on %s", hostPort)
+	err := http.ListenAndServe(hostPort, r)
+	if err != nil {
+		log.Fatalf("Start server error: %s", err.Error())
+	}
+}
+
+// initApp инициализирует конфигурацию, подключение к базе данных и сервисы приложения
+func initApp() (*controller.Handler, *config.Config) {
 	err := config.LoadEnvVariables()
 	if err != nil {
 		log.Fatalf("error loading env variables: %v\n", err)
@@ -52,21 +74,21 @@ func main() {
 
 	handler := controller.NewHandler(authService)
 
+	return handler, conf
+}
+
+// initRouter настраивает маршруты и middleware для сервера
+func initRouter(handler *controller.Handler) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middle.JsonHeader)
 
+	r.Get("/docs/*", httpSwagger.WrapHandler)
 	r.Get("/api/tokens", handler.GetTokens)
-	r.Get("/api/refresh", handler.RefreshToken)
-	r.Get("/api/me", handler.GetGUID)
-	r.Get("/api/logout", handler.Logout)
+	r.Post("/api/refresh", handler.RefreshToken)
+	r.Post("/api/me", handler.GetGUID)
+	r.Post("/api/logout", handler.Logout)
 
-	hostPort := fmt.Sprintf("%s:%d", conf.Server.Host, conf.Server.Port)
-
-	log.Printf("Server starting on %s", hostPort)
-	err = http.ListenAndServe(hostPort, r)
-	if err != nil {
-		log.Fatalf("Start server error: %s", err.Error())
-	}
+	return r
 }

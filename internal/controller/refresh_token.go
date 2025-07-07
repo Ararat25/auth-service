@@ -10,12 +10,25 @@ import (
 	"time"
 )
 
-const webhook = "https://webhook/notify"
+const webhook = "https://webhook/notify" // webhook для информирования о попытке входа со стороннего IP
 
+// refreshReq - стуктура для запроса на обновление токенов
 type refreshReq struct {
-	AccessToken string `json:"accessToken"`
+	AccessToken string `json:"accessToken" example:"eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJhaWQiOiJhYzMzNDhiNy01MGQ3LTQ1NjMtYmE5NS02MzU5OWY5MWQ4NzEiLCJleHAiOjE3NTE5MTk5ODcsImlhdCI6MTc1MTkxOTM4N30.O2ZddFrqUbI33SZ3M5rHYDeJMaYzXrAgk13VP_xJIdIxgOAc-C4qtlGrSDDNqYDcvDWbSfNtJ2JmYm0vC0e8Ug"`
 }
 
+// RefreshToken godoc
+// @Summary Обновить пару токенов
+// @Description Обновляет access и refresh токены при передаче пары токенов (access в теле запроса, refresh в cookie).
+// Проверяет User-Agent и IP, отправляет уведомление на webhook при смене IP.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param accessToken body refreshReq true "Access Token"
+// @Success 200 {object} entity.Tokens "Новая пара токенов"
+// @Failure 400 {object} ErrorResponse "Ошибки валидации или отсутствуют токены"
+// @Failure 401 {object} ErrorResponse "Несовпадение User-Agent или неуспешное обновление"
+// @Router /api/refresh [get]
 func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	req := refreshReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)

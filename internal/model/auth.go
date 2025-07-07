@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Service - структура для сервиса аутентификации
 type Service struct {
 	tokenSalt       []byte
 	accessTokenTTL  time.Duration
@@ -18,6 +19,7 @@ type Service struct {
 	Storage         *gorm.DB
 }
 
+// NewAuthService возвращает новый объект структуры Service
 func NewAuthService(tokenSalt []byte, accessTokenTTL time.Duration, refreshTokenTTL time.Duration, storage *gorm.DB) *Service {
 	return &Service{
 		tokenSalt:       tokenSalt,
@@ -50,7 +52,7 @@ func (s *Service) AuthUser(userId uuid.UUID, ua, ip string) (entity.Tokens, erro
 	return tokens, nil
 }
 
-// VerifyUser верифицирует пользователя по access токену
+// VerifyUser верифицирует пользователя по access токену и возвращает его id
 func (s *Service) VerifyUser(token string) (uuid.UUID, error) {
 	claims := &entity.AccessTokenClaims{}
 	parsedToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
@@ -107,6 +109,7 @@ func (s *Service) RefreshToken(refreshToken, accessTokenFromReq string) (entity.
 	return tokens, nil
 }
 
+// Logout деавторизует пользователя по access токену
 func (s *Service) Logout(accessToken string) error {
 	claims := &entity.AccessTokenClaims{}
 	token, err := jwt.ParseWithClaims(accessToken, claims, s.parseJWT)
@@ -122,6 +125,7 @@ func (s *Service) Logout(accessToken string) error {
 	return nil
 }
 
+// GetSession возвращает сессию из бд
 func (s *Service) GetSession(refreshToken string) (entity.Session, error) {
 	var session entity.Session
 	err := s.Storage.Where(&entity.Session{RefreshToken: refreshToken}).First(&session).Error
@@ -132,6 +136,7 @@ func (s *Service) GetSession(refreshToken string) (entity.Session, error) {
 	return session, nil
 }
 
+// DeleteSession удаляет сессию из бд
 func (s *Service) DeleteSession(id int) error {
 	return s.Storage.Delete(&entity.Session{}, id).Error
 }
@@ -195,6 +200,7 @@ func (s *Service) generateRefreshToken(userId uuid.UUID) (string, error) {
 	return signedToken, nil
 }
 
+// parseJWT парсит jwt токен
 func (s *Service) parseJWT(token *jwt.Token) (interface{}, error) {
 	_, ok := token.Method.(*jwt.SigningMethodHMAC)
 	if !ok {
@@ -203,23 +209,3 @@ func (s *Service) parseJWT(token *jwt.Token) (interface{}, error) {
 
 	return s.tokenSalt, nil
 }
-
-//
-//// hashPassword хэширует строку
-//func (s *Service) hashPassword(password string) string {
-//	var passwordBytes = []byte(password)
-//	var sha512Hasher = sha512.New()
-//
-//	passwordBytes = append(passwordBytes, s.passwordSalt...)
-//	sha512Hasher.Write(passwordBytes)
-//
-//	var hashedPasswordBytes = sha512Hasher.Sum(nil)
-//	var hashedPasswordHex = hex.EncodeToString(hashedPasswordBytes)
-//
-//	return hashedPasswordHex
-//}
-//
-//// doPasswordsMatch сравнивает хеш паролей
-//func (s *Service) doPasswordsMatch(hashedPassword, currPassword string) bool {
-//	return hashedPassword == s.hashPassword(currPassword)
-//}

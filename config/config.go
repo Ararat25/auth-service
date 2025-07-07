@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const EnvFileName = ".env"
+const EnvFileName = ".env" // название env файла
 
 // Config структура для парсинга файла конфигурации
 type Config struct {
