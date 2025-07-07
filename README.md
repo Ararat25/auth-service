@@ -71,7 +71,7 @@ docker-compose -f docker-compose.yml up -d
 
 ## Документация
 Swagger UI доступен по адресу:  
-[http://localhost:8080/docs/index.html](http://localhost:8080/docs/index.html)  
+[http://localhost:8080/api/docs/index.html](http://localhost:8080/api/docs/index.html)  
 В документации описаны все эндпоинты, возможные ошибки и примеры запросов.
 
 ---

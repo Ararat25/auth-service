@@ -84,7 +84,7 @@ func initRouter(handler *controller.Handler) *chi.Mux {
 	r.Use(middleware.Recoverer)
 	r.Use(middle.JsonHeader)
 
-	r.Get("/docs/*", httpSwagger.WrapHandler)
+	r.Get("/api/docs/*", httpSwagger.WrapHandler)
 	r.Get("/api/tokens", handler.GetTokens)
 	r.Post("/api/refresh", handler.RefreshToken)
 	r.Post("/api/me", handler.GetGUID)
