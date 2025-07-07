@@ -1,8 +1,9 @@
 package entity
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Session struct {
@@ -12,6 +13,5 @@ type Session struct {
 	AccessTokenID uuid.UUID `json:"accessTokenID" gorm:"type:uuid;column:accessTokenID"`
 	UA            string    `json:"ua" gorm:"type:varchar(200);column:ua"`
 	IP            string    `json:"ip" gorm:"type:varchar(15);column:ip"`
-	ExpiresIn     int64     `json:"expiresIn" gorm:"column:expiresIn"`
 	CreatedAt     time.Time `json:"createdAt" gorm:"type:timestamptz;column:createdAt"`
 }

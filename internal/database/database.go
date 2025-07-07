@@ -2,11 +2,11 @@ package database
 
 import (
 	"fmt"
+
 	"github.com/Ararat25/auth-service/internal/entity"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
 )
 
 type Dbinstance struct {
@@ -15,9 +15,10 @@ type Dbinstance struct {
 
 var DB Dbinstance
 
-func ConnectDB(dbUser string, dbPassword string, dbName string, dbPort int) {
+func ConnectDB(dbHost string, dbUser string, dbPassword string, dbName string, dbPort int) error {
 	dsn := fmt.Sprintf(
-		"host=db user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Europe/Moscow",
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Europe/Moscow",
+		dbHost,
 		dbUser,
 		dbPassword,
 		dbName,
@@ -25,23 +26,22 @@ func ConnectDB(dbUser string, dbPassword string, dbName string, dbPort int) {
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logger.Error),
 	})
-
 	if err != nil {
-		log.Fatal("Failed to connect to database.\n", err)
+		return err
 	}
 
-	log.Println("connected to database")
-	db.Logger = logger.Default.LogMode(logger.Info)
+	db.Logger = logger.Default.LogMode(logger.Error)
 
-	log.Println("running migration database")
 	err = db.AutoMigrate(&entity.Session{})
 	if err != nil {
-		return
+		return err
 	}
 
 	DB = Dbinstance{
 		Db: db,
 	}
+
+	return nil
 }

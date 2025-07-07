@@ -6,12 +6,12 @@ import (
 )
 
 type AccessTokenClaims struct {
-	UserId uuid.UUID `json:"userId"`
+	UserId        uuid.UUID `json:"userId"`
+	AccessTokenID uuid.UUID `json:"aid"`
 	jwt.RegisteredClaims
 }
 
 type RefreshTokenClaims struct {
-	UserId        uuid.UUID `json:"userId"`
-	AccessTokenID uuid.UUID `json:"aid"`
+	UserId uuid.UUID `json:"userId"`
 	jwt.RegisteredClaims
 }
